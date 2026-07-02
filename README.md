@@ -1,6 +1,5 @@
 # hd
 ![Coverage](https://img.shields.io/badge/Coverage-100.0%25-brightgreen)
-[![Go Report Card](https://goreportcard.com/badge/github.com/denwwer/go-hd)](https://goreportcard.com/report/github.com/denwwer/go-hd)
 [![Go Reference](https://pkg.go.dev/badge/github.com/denwwer/go-hd.svg)](https://pkg.go.dev/github.com/denwwer/go-hd)
 
 Humanize Duration (hd) – Go package that works like `Duration.String()` but returns a calendar-accurate difference (years, months, days, hours, minutes, seconds) for human-friendly output.
