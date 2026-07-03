@@ -157,7 +157,7 @@ type Lang int
 
 // List of support languages.
 const (
-	LangEN Lang = iota
+	LangEN Lang = (1 + iota)
 	LangDE
 	LangAR
 	LangCS
