@@ -74,11 +74,11 @@ func (d Duration) String() string {
 	}
 
 	write("%dy", d.Years)
-	write("%dm", d.Months)
+	write("%dmo", d.Months)
 	write("%dw", d.Weeks)
 	write("%dd", d.Days)
 	write("%dh", d.Hours)
-	write("%dm", d.Minutes)
+	write("%dmin", d.Minutes)
 	write("%ds", d.Seconds)
 
 	if s.Len() == 0 {
