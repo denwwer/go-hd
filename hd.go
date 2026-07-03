@@ -1,5 +1,5 @@
 // Humanize Duration (hd) – Go package that works like Duration.String() but returns
-// a calendar-accurate difference (years, months, days, hours, minutes, seconds) for human-friendly output.
+// a calendar-accurate difference (years, months, weeks, days, hours, minutes, seconds) for human-friendly output.
 package hd
 
 import (
@@ -9,14 +9,59 @@ import (
 	"time"
 )
 
-// Duration represents the difference in calendar units.
-type Duration struct {
-	Years, Months, Days     int
-	Hours, Minutes, Seconds int
+type options struct {
+	loc       *time.Location
+	lang      Lang
+	delimiter string
 }
 
-// String returns a string representing the duration in format "1y 6m 8d 5h 8m 17s".
+// Option for customizing formatting.
+type Option func(*options)
+
+func defaultOptions() *options {
+	return &options{
+		loc:       time.UTC,
+		delimiter: ", ",
+	}
+}
+
+// Location sets the time zone used for the calendar calculation.
+func Location(loc *time.Location) Option {
+	return func(c *options) {
+		c.loc = loc
+	}
+}
+
+// Language sets the language, e.g. "de", "es".
+func Language(l Lang) Option {
+	return func(c *options) {
+		c.lang = l
+	}
+}
+
+// Delimiter sets the delimiter used for formatting date.
+func Delimiter(d string) Option {
+	return func(c *options) {
+		c.delimiter = d
+	}
+}
+
+// Duration represents the difference in calendar units.
+type Duration struct {
+	Years, Months, Weeks, Days int
+	Hours, Minutes, Seconds    int
+
+	*options
+}
+
+// String returns a string representing the duration in format "1y 6m 2w 1d 5h 8m 17s".
 func (d Duration) String() string {
+	if d.options != nil {
+		if lang, ok := languages[d.lang]; ok {
+			return d.localize(lang)
+		}
+	}
+
 	var s strings.Builder
 
 	write := func(format string, v int) {
@@ -30,6 +75,7 @@ func (d Duration) String() string {
 
 	write("%dy", d.Years)
 	write("%dm", d.Months)
+	write("%dw", d.Weeks)
 	write("%dd", d.Days)
 	write("%dh", d.Hours)
 	write("%dm", d.Minutes)
@@ -46,20 +92,20 @@ func (d Duration) MarshalJSON() ([]byte, error) {
 	return json.Marshal(d.String())
 }
 
-// Since returns a calendar-accurate duration from t to time.Now() in the given location zone.
-func Since(t time.Time, loc *time.Location) Duration {
-	return Between(t, time.Now(), loc)
+// Since returns a calendar-accurate duration from t to time.Now().
+func Since(t time.Time, opts ...Option) Duration {
+	return Between(t, time.Now(), opts...)
 }
 
-// Between calculates the calendar-accurate duration
-// between any two times (start -> end) in the given location. If loc is nil, time.UTC is used.
-func Between(start, end time.Time, loc *time.Location) Duration {
-	if loc == nil {
-		loc = time.UTC
+// Between calculates the calendar-accurate duration between any two times.
+func Between(start, end time.Time, opts ...Option) Duration {
+	opt := defaultOptions()
+	for _, o := range opts {
+		o(opt)
 	}
 
-	start = start.In(loc)
-	end = end.In(loc)
+	start = start.In(opt.loc)
+	end = end.In(opt.loc)
 
 	if start.After(end) {
 		start, end = end, start
@@ -82,12 +128,18 @@ func Between(start, end time.Time, loc *time.Location) Duration {
 	minutes := int(partial.Minutes()) % 60
 	seconds := int(partial.Seconds()) % 60
 
+	weeks := days / 7
+	days %= 7
+
 	return Duration{
 		Years:   years,
 		Months:  months,
+		Weeks:   weeks,
 		Days:    days,
 		Hours:   hours,
 		Minutes: minutes,
 		Seconds: seconds,
+
+		options: opt,
 	}
 }
