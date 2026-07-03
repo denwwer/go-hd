@@ -16,7 +16,7 @@ d.Years // => 1
 d.Months // => 6
 d.Weeks // => 1
 d.Days // => 1
-d.String() // => 1y 6m 1w 1d 5h 8m 17s
+d.String() // => 1y 6mo 1w 1d 5h 8min 17s
 ```
 
 ### Between
@@ -43,7 +43,7 @@ start := time.Date(2025, 9, 22, 0, 0, 0, 0, time.UTC)
 end := time.Date(2025, 9, 23, 12, 30, 15, 0, time.UTC)
 
 d := hd.Between(start, end, hd.Location(loc))
-d.String() // => 1d 12h 30m 15s
+d.String() // => 1d 12h 30min 15s
 ```
 With custom delimiter:
 

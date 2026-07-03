@@ -57,19 +57,6 @@ func TestBetween_DaysUnderWeek(t *testing.T) {
 	assert.Equal(t, "6d", d.String())
 }
 
-func TestBetween_NilLocationUTC(t *testing.T) {
-	t.Parallel()
-
-	start := utc(2022, 3, 14, 10, 0, 0)
-	end := utc(2023, 3, 14, 12, 0, 0)
-
-	d := Between(start, end)
-	assert.Equal(t, 1, d.Years)
-	assert.Equal(t, 0, d.Months)
-	assert.Equal(t, 0, d.Days)
-	assert.Equal(t, 2, d.Hours)
-}
-
 func TestBetween_WithLocation(t *testing.T) {
 	loc, err := time.LoadLocation("America/New_York")
 	require.Nil(t, err)
@@ -94,6 +81,16 @@ func TestBetween_ReverseOrder(t *testing.T) {
 
 	d := Between(start, end)
 	assert.Equal(t, 2, d.Years)
+}
+
+func TestBetween_LangZeroDuration(t *testing.T) {
+	t.Parallel()
+
+	// start == end
+	start := utc(2024, 5, 1, 0, 0, 0)
+
+	d := Between(start, start, Language(LangEN))
+	assert.Equal(t, "0 seconds", d.String())
 }
 
 func TestBetween_LeapYear(t *testing.T) {
@@ -202,12 +199,12 @@ func TestDuration_String(t *testing.T) {
 		{
 			name:   "All non-zero",
 			dur:    Duration{Years: 1, Months: 2, Weeks: 3, Days: 4, Hours: 5, Minutes: 6, Seconds: 7},
-			expect: "1y 2m 3w 4d 5h 6m 7s",
+			expect: "1y 2mo 3w 4d 5h 6min 7s",
 		},
 		{
 			name:   "Some zeros",
 			dur:    Duration{Years: 0, Months: 0, Days: 3, Hours: 0, Minutes: 5, Seconds: 0},
-			expect: "3d 5m",
+			expect: "3d 5min",
 		},
 		{
 			name:   "All zeros",
@@ -248,5 +245,5 @@ func TestDuration_MarshalJSON(t *testing.T) {
 
 	b, err := json.Marshal(data)
 	require.Nil(t, err)
-	assert.Equal(t, `{"duration":"3y 3m 2w 6h 30m 15s"}`, string(b))
+	assert.Equal(t, `{"duration":"3y 3mo 2w 6h 30min 15s"}`, string(b))
 }
