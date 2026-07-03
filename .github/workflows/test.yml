@@ -11,10 +11,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: 'go.mod'
           cache: true
@@ -24,12 +24,12 @@ jobs:
           go test -v ./... -covermode=count -coverprofile=coverage.out
           go tool cover -func=coverage.out -o=coverage.out
 
-      - name: Go Coverage Badge
+      - name: Coverage Badge
         uses: tj-actions/coverage-badge-go@v3
         with:
           filename: coverage.out
 
-      - name: Verify Changed files
+      - name: Verify README Changed
         uses: tj-actions/verify-changed-files@v16
         id: verify-changed-files
         with:
